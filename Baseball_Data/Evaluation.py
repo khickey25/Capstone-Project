@@ -1,7 +1,6 @@
 #create a pipeline score a particular model.
 def eval_model(clf, X, y, cv):
-    """Evaluate a model's performance using cross validation, using Random Oversampling
-       to balance the classes of the target.
+    """Evaluate a model's performance using cross validation.
     Input: 
         clf, the classifier.
         X: data to be used in cross-validation
@@ -10,25 +9,20 @@ def eval_model(clf, X, y, cv):
     Output: average accuracy, f1 score, and AUC scores for number of folds ."""
     
     import numpy as np
-    import imblearn.over_sampling 
-    from imblearn.pipeline import make_pipeline
     from sklearn.model_selection import cross_validate
     
-    #clf is Logistic Regression defined outside the function
-    model = clf
+    #clf is Logistic Regression defined outside the function            
     
-    ros = imblearn.over_sampling.RandomOverSampler(ratio=1, random_state=777)
-    pipe = make_pipeline(ros, model)
-                       
-    
-    cv_results = cross_validate(pipe, X, y, scoring = ['accuracy', 'f1', 'roc_auc'], cv =cv,            return_estimator=True, return_train_score = True)
+    cv_results = cross_validate(clf, X, y, scoring = ['accuracy', 'f1', 'roc_auc'], 
+                                cv =cv, return_estimator=True, return_train_score = True)
 
-    
-    
     for result in ['train_accuracy', 'test_accuracy', 'train_f1', 'test_f1', 'train_roc_auc', 'test_roc_auc']:
         print(f"Mean {result} Value: {np.mean(cv_results[result])}")
         print(f"{result} scores: {cv_results[result]}")
         print() 
+    print(clf.get_params().keys())
+    
+    return cv_results['estimator']
 
         
 def hyperparam_search_pipeline(clf, X, y, parameter_dict, n_iter, cv, refit):
@@ -48,13 +42,7 @@ def hyperparam_search_pipeline(clf, X, y, parameter_dict, n_iter, cv, refit):
     from imblearn.over_sampling import RandomOverSampler
     from sklearn.model_selection import RandomizedSearchCV
 
-
-    #First, define the pipeline using same Over-sampling strategy as above
-    #use basic decision tree as the classifier
-    pipe = Pipeline(steps = [('sampler', RandomOverSampler(ratio = 1, random_state=777)),
-                    ('clf', clf)]
-                   )
-
+                   
     #define hyperparameters for classifier
     params = parameter_dict
 
@@ -62,7 +50,7 @@ def hyperparam_search_pipeline(clf, X, y, parameter_dict, n_iter, cv, refit):
     scoring = {'AUC': 'roc_auc', 'Accuracy': 'accuracy', 'F1': 'f1'}
 
     #create Random Search Object, using the pipe object
-    random_search = RandomizedSearchCV(pipe, param_distributions=params,
+    random_search = RandomizedSearchCV(clf, param_distributions=params,
                                 n_iter=n_iter, n_jobs=-1, scoring = scoring, refit = refit,
                                 return_train_score=True, cv = cv, random_state= 777)
     #Fit to the training splits
@@ -120,4 +108,39 @@ def plot_search_results(cv_results, param,  metrics):
 
     plt.legend(loc="best")
     plt.grid(False)
+    plt.show()
+    
+def plot_validation_curve(clf, X, y, param_range, param_name, metric):
+
+    import matplotlib.pyplot as plt
+    import numpy as np
+
+    from sklearn.tree import DecisionTreeClassifier
+    from sklearn.model_selection import validation_curve
+
+    #param_range = np.linspace(1, 100, 5)
+    train_scores, test_scores = validation_curve(
+        clf, X, y, param_name=param_name, param_range=param_range,
+        cv=5, scoring=metric, n_jobs=-1)
+    train_scores_mean = np.mean(train_scores, axis=1)
+    train_scores_std = np.std(train_scores, axis=1)
+    test_scores_mean = np.mean(test_scores, axis=1)
+    test_scores_std = np.std(test_scores, axis=1)
+
+    plt.title("Validation Curve with Decision Tree")
+    plt.xlabel(f"{param_name}")
+    plt.ylabel(f" {metric} Score")
+    plt.ylim(0.0, 1.1)
+    lw = 2
+    plt.plot(param_range, train_scores_mean, label="Training score",
+                 color="darkorange", lw=lw)
+    plt.fill_between(param_range, train_scores_mean - train_scores_std,
+                     train_scores_mean + train_scores_std, alpha=0.2,
+                     color="darkorange", lw=lw)
+    plt.plot(param_range, test_scores_mean, label="Cross-validation score",
+                 color="navy", lw=lw)
+    plt.fill_between(param_range, test_scores_mean - test_scores_std,
+                     test_scores_mean + test_scores_std, alpha=0.2,
+                     color="navy", lw=lw)
+    plt.legend(loc="best")
     plt.show()

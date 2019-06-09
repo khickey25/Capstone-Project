@@ -33,7 +33,7 @@ def preprocess_data(raw_data_file):
        'release_pos_y', 'release_pos_z', 'pfx_x', 'pfx_z', 'vx0', 'vy0', 'vz0',
        'ax', 'ay', 'az', 'sz_top', 'sz_bot', 'release_extension']
     
-    cat_features = ['pitch_name', 'player_name']
+    cat_features = ['pitch_name', 'player_name', 'p_throws']
     
     bsb_num = bsb.drop(columns = cat_features)
     
@@ -48,10 +48,11 @@ def preprocess_data(raw_data_file):
     #make a dataframe to concat with categorical data that was filtered out
     baseball = pd.DataFrame(baseball, columns = bsb_num.columns)
 
-    #concat the pitch_name thta was filtered out
+    #concat the pitch_name and p_throws that was filtered out
     baseball['pitch_name'] = bsb['pitch_name']
+    baseball['p_throws'] = bsb['p_throws']
     
-    #get dummies, add a feature which indicates if the value was missing or not
+    #get dummies, add a feature which indicates if the class value was missing or not
     baseball = pd.get_dummies(baseball, dummy_na=True)
     
     #add back the pitcher name

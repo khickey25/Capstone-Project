@@ -1,7 +1,8 @@
 def preprocess_data(raw_data_file):
     '''Input the raw baseball file, 'Statcast_data.csv' as a pandas dataframe for data preprocessing.
        Go through preprocessing steps and output the data in a form suitable 
-       to be trained on by machine learning models'''
+       to be trained on by machine learning models.
+       Data formatting steps based on insights from EDA notebook.'''
     
     import pandas as pd
     import numpy as np
@@ -11,6 +12,7 @@ def preprocess_data(raw_data_file):
     
     bsb = pd.read_csv(raw_data_file, index_col = 0)
     
+    #Begin data formatting; see EDA notebook
     #format the classes of the target, filter out to avoid transformations. 
     #Will store the target as a variable to
     #append back after all transformations taken place.

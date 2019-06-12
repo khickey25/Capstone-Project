@@ -20,9 +20,7 @@ def eval_model(clf, X, y, cv):
         print(f"Mean {result} Value: {np.mean(cv_results[result])}")
         print(f"{result} scores: {cv_results[result]}")
         print() 
-    print(clf.get_params().keys())
     
-    return cv_results['estimator']
 
         
 def hyperparam_search_pipeline(clf, X, y, parameter_dict, n_iter, cv, refit):

@@ -142,3 +142,17 @@ def plot_validation_curve(clf, X, y, param_range, param_name, metric):
                      color="navy", lw=lw)
     plt.legend(loc="best")
     plt.show()
+    
+    
+def eval_test_set(x_test_predictions, y_test):
+    
+    from sklearn import metrics
+    print(f"Accuracy Score: {metrics.accuracy_score(y_test, x_test_predictions)}")
+    print()
+    print(f"AUC Score: {metrics.roc_auc_score(y_test, x_test_predictions)}")
+    print()
+    print(f"F1 Score: {metrics.f1_score(y_test, x_test_predictions)}")
+    print()
+    print(f"Classification Report: \n {metrics.classification_report(y_test, x_test_predictions)}")
+    print()
+    print(f" Confustion Matrix: \n {metrics.confusion_matrix(y_test, x_test_predictions)}")
